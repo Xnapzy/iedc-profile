@@ -1,0 +1,3179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Innovators Directory</title>
+
+  <!-- SEO Meta Tags -->
+  <meta name="description"
+    content="Explore the official Innovators Directory. View leadership, core committees, and general members with premium interactive ID cards.">
+  <meta name="keywords"
+    content="club directory, member profiles, professional directory, glassmorphism UI, team profiles">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap"
+    rel="stylesheet">
+
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- QRCode CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    /* ==========================================
+       1. DESIGN SYSTEM & CSS VARIABLES
+       ========================================== */
+    :root {
+      --bg-dark: #070913;
+      --bg-surface: rgba(15, 22, 42, 0.65);
+      --bg-surface-hover: rgba(30, 41, 59, 0.75);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-color-hover: rgba(255, 255, 255, 0.16);
+
+      /* Colors */
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+
+      /* Glares & Accents */
+      --accent-leadership-start: #00f2fe;
+      --accent-leadership-end: #4facfe;
+      --accent-core-start: #05f0a1;
+      --accent-core-end: #00b4db;
+      --accent-member-start: #ff758c;
+      --accent-member-end: #ff7eb3;
+
+      /* Status Colors */
+      --status-active: #10b981;
+      --status-active-glow: rgba(16, 185, 129, 0.4);
+
+      /* Shadows */
+      --shadow-premium: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+      --shadow-glow-leadership: 0 0 25px rgba(0, 242, 254, 0.2);
+      --shadow-glow-core: 0 0 25px rgba(5, 240, 161, 0.2);
+      --shadow-glow-member: 0 0 25px rgba(255, 117, 140, 0.2);
+
+      /* Layout Transition */
+      --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* Reset & Base Styles */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #030712;
+      background-image:
+        radial-gradient(circle at 10% 20%, rgba(5, 240, 161, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 50% 50%, rgba(3, 7, 18, 0.5) 0%, #030712 100%);
+      background-attachment: fixed;
+      color: var(--text-primary);
+      font-family: 'Outfit', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.5;
+      position: relative;
+    }
+
+    /* Ambient Background Glows */
+    body::before,
+    body::after {
+      content: '';
+      position: absolute;
+      width: 45vw;
+      height: 45vw;
+      border-radius: 50%;
+      z-index: -1;
+      filter: blur(140px);
+      pointer-events: none;
+      opacity: 0.18;
+    }
+
+    body::before {
+      top: -10%;
+      left: -10%;
+      background: radial-gradient(circle, #05f0a1 0%, transparent 70%);
+    }
+
+    body::after {
+      bottom: -10%;
+      right: -10%;
+      background: radial-gradient(circle, #10b981 0%, transparent 70%);
+    }
+
+    /* Container */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem;
+      position: relative;
+    }
+
+    /* Brand Logo */
+    .brand-logo-container {
+      position: absolute;
+      top: 3rem;
+      left: 1.5rem;
+      z-index: 10;
+    }
+
+    .brand-logo {
+      height: clamp(55px, 7vw, 85px);
+      width: auto;
+      object-fit: contain;
+      opacity: 0.95;
+      transition: var(--transition-smooth);
+    }
+
+    .brand-logo:hover {
+      opacity: 1;
+      transform: scale(1.05);
+    }
+
+    @media (max-width: 992px) {
+      .brand-logo-container {
+        position: static;
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      .brand-logo {
+        height: 70px;
+      }
+
+      header {
+        margin-top: 1.5rem;
+      }
+    }
+
+    /* ==========================================
+       2. TYPOGRAPHY & HEADER
+       ========================================== */
+    header {
+      text-align: center;
+      margin-bottom: 4rem;
+      margin-top: 4.5rem;
+    }
+
+    .badge-top {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--accent-leadership-start);
+      margin-bottom: 1.5rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      font-size: clamp(1.8rem, 4vw, 2.5rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #ffffff 30%, #a5b4fc 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: clamp(1rem, 2vw, 1.15rem);
+      max-width: 600px;
+      margin: 0 auto;
+      font-weight: 350;
+    }
+
+    /* ==========================================
+       3. INTERACTIVE CONTROLS (SEARCH & FILTERS)
+       ========================================== */
+    .controls-wrapper {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 1.25rem;
+      margin-bottom: 3.5rem;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: var(--shadow-premium);
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    @media (min-width: 768px) {
+      .controls-wrapper {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+    }
+
+    /* Search Box */
+    .search-box-container {
+      position: relative;
+      flex: 1;
+      max-width: 100%;
+    }
+
+    @media (min-width: 768px) {
+      .search-box-container {
+        max-width: 400px;
+      }
+    }
+
+    .search-box-container i,
+    .search-box-container svg {
+      position: absolute;
+      right: 1.25rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      transition: var(--transition-smooth);
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 0.85rem 3.2rem 0.85rem 1.25rem;
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.95rem;
+      outline: none;
+      transition: var(--transition-smooth);
+    }
+
+    .search-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .search-input:focus {
+      border-color: rgba(99, 102, 241, 0.5);
+      box-shadow: 0 0 15px rgba(99, 102, 241, 0.15);
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    .search-input:focus~i,
+    .search-input:focus~svg {
+      color: var(--accent-leadership-start);
+    }
+
+    /* Filters */
+    .filter-tabs {
+      display: flex;
+      gap: 0.5rem;
+      overflow-x: auto;
+      padding-bottom: 0.25rem;
+      scrollbar-width: none;
+      /* Hide scrollbar for Firefox */
+    }
+
+    .filter-tabs::-webkit-scrollbar {
+      display: none;
+      /* Hide scrollbar for Chrome/Safari */
+    }
+
+    .filter-tab {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-secondary);
+      padding: 0.7rem 1.25rem;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: var(--transition-smooth);
+    }
+
+    .filter-tab:hover {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .filter-tab.active {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.08);
+      border-color: var(--border-color-hover);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    /* ==========================================
+       4. SECTIONS & GRIDS
+       ========================================== */
+    .section-tier {
+      margin-bottom: 4.5rem;
+      transition: var(--transition-smooth);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      position: relative;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      text-transform: capitalize;
+    }
+
+    .section-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 2.25rem;
+      justify-items: center;
+    }
+
+    /* ==========================================
+       5. PREMIUM ID CARD COMPONENT
+       ========================================== */
+    .id-card {
+      width: 100%;
+      max-width: 340px;
+      height: 390px;
+      background: linear-gradient(135deg, var(--card-grad-start) 0%, var(--card-grad-mid) 40%, var(--card-grad-end) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: var(--shadow-premium);
+      display: flex;
+      position: relative;
+      cursor: pointer;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      transition: var(--transition-smooth);
+    }
+
+    .card-left {
+      width: 260px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      padding: 0 1.25rem 1.25rem 1.25rem;
+      box-sizing: border-box;
+      text-align: left;
+    }
+
+    /* Avatar Frame */
+    .photo-strip {
+      position: absolute;
+      top: 0;
+      left: 1.25rem;
+      width: 120px;
+      height: 185px;
+      overflow: hidden;
+      border-radius: 0 0 20px 20px;
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-top: none;
+      box-sizing: border-box;
+      z-index: 2;
+    }
+
+    .photo-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      filter: grayscale(100%) contrast(1.1);
+      transition: var(--transition-smooth);
+    }
+
+    /* Text details */
+    .member-name {
+      font-size: 1.45rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      margin-bottom: 0.65rem;
+      color: var(--text-primary);
+      text-transform: uppercase;
+      line-height: 1.2;
+    }
+
+    /* Role details block */
+    .role-details {
+      border-left: 3px solid #3b82f6;
+      padding-left: 0.75rem;
+      margin-bottom: 1.5rem;
+      text-align: left;
+    }
+
+    .role-title {
+      font-size: 0.825rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #ffffff;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.15rem;
+    }
+
+    .role-dept {
+      font-size: 0.725rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      letter-spacing: 0.05em;
+    }
+
+    /* Card Left Footer */
+    .card-left-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      width: 100%;
+      margin-top: auto;
+    }
+
+    .footer-qr-section {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: flex-start;
+    }
+
+    .social-links {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .social-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      color: rgba(255, 255, 255, 0.7);
+      background: transparent;
+      border: 1px solid transparent;
+      transition: var(--transition-smooth);
+      text-decoration: none;
+    }
+
+    .social-link:hover {
+      color: #ffffff;
+      transform: translateY(-2px);
+    }
+
+    .social-link.email {
+      background: #3b82f6;
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .social-link.email:hover {
+      background: #2563eb;
+      box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+    }
+
+    .social-link.linkedin-btn {
+      background: #0a66c2;
+      color: #ffffff;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .social-link.linkedin-btn:hover {
+      background: #004182;
+      box-shadow: 0 0 8px rgba(10, 102, 194, 0.5);
+    }
+
+    .id-badge-code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.725rem;
+      color: var(--text-secondary);
+      font-weight: 600;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 0.25rem 0.5rem;
+      border-radius: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* Right Section/Sidebar */
+    .card-right {
+      width: 80px;
+      height: 100%;
+      background: rgba(4, 6, 11, 0.45);
+      border-left: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 0.25rem;
+      box-sizing: border-box;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    .sidebar-logo {
+      width: 45px;
+      height: auto;
+      object-fit: contain;
+      opacity: 0.9;
+    }
+
+    /* QR Code styling */
+    .qr-container {
+      width: 45px;
+      height: 45px;
+      background: #ffffff;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 6px;
+      padding: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      box-sizing: border-box;
+    }
+
+    .qr-container canvas,
+    .qr-container img {
+      width: 100% !important;
+      height: 100% !important;
+      display: block;
+    }
+
+    /* Barcode styling */
+    .barcode-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin: 1rem 0;
+    }
+
+    .barcode-container {
+      width: 26px;
+      height: 85px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.85;
+    }
+
+    .barcode-text {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 7.5px;
+      color: rgba(255, 255, 255, 0.45);
+      writing-mode: vertical-rl;
+      text-transform: lowercase;
+      letter-spacing: 0.1em;
+      transform: rotate(180deg);
+    }
+
+    /* Sidebar Badge */
+    .sidebar-badge {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 0.6rem 0.3rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 130px;
+      box-sizing: border-box;
+    }
+
+    .sidebar-badge-text {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: #ffffff;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      white-space: nowrap;
+    }
+
+    /* ==========================================
+       6. INTERACTION HOVER EFFECTS
+       ========================================== */
+    .id-card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-premium), var(--tier-glow);
+      border-color: rgba(255, 255, 255, 0.2);
+      background: linear-gradient(135deg, var(--card-grad-start-hover) 0%, rgba(255, 255, 255, 0.06) 40%, rgba(255, 255, 255, 0.01) 100%);
+    }
+
+    .id-card:hover .photo-image {
+      transform: scale(1.05);
+    }
+
+    /* Specific Tier Styles via Custom Properties */
+    .tier-leadership {
+      --card-grad-start: rgba(79, 172, 254, 0.12);
+      --card-grad-start-hover: rgba(79, 172, 254, 0.25);
+      --card-grad-mid: rgba(24, 46, 197, 0.04);
+      --card-grad-end: rgba(7, 10, 30, 0.35);
+      --tier-glow: var(--shadow-glow-leadership);
+    }
+
+    .tier-core {
+      --card-grad-start: rgba(5, 240, 161, 0.12);
+      --card-grad-start-hover: rgba(5, 240, 161, 0.25);
+      --card-grad-mid: rgba(11, 85, 80, 0.04);
+      --card-grad-end: rgba(4, 16, 17, 0.35);
+      --tier-glow: var(--shadow-glow-core);
+    }
+
+    .tier-member {
+      --card-grad-start: rgba(255, 117, 140, 0.12);
+      --card-grad-start-hover: rgba(255, 117, 140, 0.25);
+      --card-grad-mid: rgba(97, 30, 59, 0.04);
+      --card-grad-end: rgba(23, 7, 16, 0.35);
+      --tier-glow: var(--shadow-glow-member);
+    }
+
+    /* ==========================================
+       7. DETAIL MODAL (MODERN BADGE DRILLDOWN)
+       ========================================== */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(5, 8, 22, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: #0f162a;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 32px;
+      width: 100%;
+      max-width: 480px;
+      padding: 3rem 2.25rem 2.25rem 2.25rem;
+      position: relative;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+      transform: scale(0.9) translateY(20px);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .modal-overlay.open .modal-card {
+      transform: scale(1) translateY(0);
+    }
+
+    /* Top Lanyard attachment loop simulation */
+    .modal-card::before {
+      content: '';
+      position: absolute;
+      top: -12px;
+      width: 50px;
+      height: 24px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      z-index: -1;
+    }
+
+    /* Close Button */
+    .modal-close-btn {
+      position: absolute;
+      top: 1.25rem;
+      right: 1.25rem;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-secondary);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition-smooth);
+    }
+
+    .modal-close-btn:hover {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.1);
+      transform: rotate(90deg);
+    }
+
+    /* Modal Content Elements */
+    .modal-avatar {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      padding: 5px;
+      background: linear-gradient(135deg, var(--modal-accent-start, #fff), var(--modal-accent-end, #ccc));
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    .modal-avatar img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid #0f162a;
+    }
+
+    .modal-name {
+      font-size: 1.75rem;
+      font-weight: 800;
+      margin-bottom: 0.25rem;
+      letter-spacing: -0.02em;
+    }
+
+    .modal-role {
+      font-size: 0.95rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(90deg, var(--modal-accent-start, #fff), var(--modal-accent-end, #ccc));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .modal-badge-info {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 16px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .info-block {
+      text-align: left;
+    }
+
+    .info-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+    }
+
+    .info-value {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .info-value.mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .modal-bio {
+      font-size: 0.925rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin-bottom: 1.75rem;
+      font-weight: 350;
+      text-align: left;
+    }
+
+    .modal-skills {
+      width: 100%;
+      text-align: left;
+      margin-bottom: 2rem;
+    }
+
+    .modal-skills-title {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+    }
+
+    .modal-skills-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .modal-skill-tag {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      color: var(--text-primary);
+      padding: 0.35rem 0.75rem;
+      border-radius: 8px;
+      font-size: 0.785rem;
+      font-weight: 500;
+    }
+
+    .modal-footer-socials {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+      padding-top: 1.5rem;
+    }
+
+    .modal-social-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.65rem 1.25rem;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: var(--transition-smooth);
+    }
+
+    .modal-social-btn.linkedin {
+      background: rgba(10, 102, 194, 0.15);
+      border: 1px solid rgba(10, 102, 194, 0.3);
+      color: #0077b5;
+    }
+
+    .modal-social-btn.linkedin:hover {
+      background: #0077b5;
+      color: #fff;
+    }
+
+    .modal-social-btn.github {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+    }
+
+    .modal-social-btn.github:hover {
+      background: #fff;
+      color: #000;
+    }
+
+    /* ==========================================
+       8. EMPTY STATE & ANCILLARY STYLING
+       ========================================== */
+    .empty-state {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 4rem 2rem;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      backdrop-filter: blur(12px);
+      margin-top: 2rem;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .empty-state i {
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    .empty-state h3 {
+      font-size: 1.25rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .spin {
+      animation: spin 1s linear infinite;
+      display: inline-block;
+    }
+
+    /* ==========================================
+       10. ADMIN DASHBOARD PREMIUM STYLING
+       ========================================== */
+    .admin-view {
+      display: none;
+      animation: fadeIn 0.4s ease;
+      min-height: 100vh;
+      padding: 2rem 1.5rem;
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      padding-bottom: 1.5rem;
+    }
+
+    .admin-header h1 {
+      margin-bottom: 0;
+      background: linear-gradient(135deg, #05f0a1 0%, #00b4db 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .admin-nav {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .admin-nav::-webkit-scrollbar {
+      display: none;
+    }
+
+    .admin-nav-btn {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--text-secondary);
+      padding: 0.75rem 1.5rem;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: var(--transition-smooth);
+    }
+
+    .admin-nav-btn:hover {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.16);
+    }
+
+    .admin-nav-btn.active {
+      color: #030712;
+      background: #05f0a1;
+      border-color: #05f0a1;
+      font-weight: 600;
+      box-shadow: 0 0 15px rgba(5, 240, 161, 0.35);
+    }
+
+    .admin-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 24px;
+      padding: 2rem;
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: var(--shadow-premium);
+      margin-bottom: 2rem;
+    }
+
+    .admin-card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: var(--text-primary);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 0.75rem;
+    }
+
+    /* Grid Layouts */
+    .admin-grid-two-col {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    @media (min-width: 992px) {
+      .admin-grid-two-col {
+        grid-template-columns: 1.3fr 0.7fr;
+      }
+    }
+
+    .form-grid-two-col {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+
+    @media (min-width: 576px) {
+      .form-grid-two-col {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .form-grid-three-col {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+
+    @media (min-width: 768px) {
+      .form-grid-three-col {
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+    }
+
+    /* Form Styles */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .form-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .form-control,
+    .form-select,
+    .form-textarea {
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 0.8rem 1rem;
+      color: var(--text-primary);
+      font-family: inherit;
+      font-size: 0.95rem;
+      outline: none;
+      transition: var(--transition-smooth);
+    }
+
+    .form-control:focus,
+    .form-select:focus,
+    .form-textarea:focus {
+      border-color: rgba(5, 240, 161, 0.5);
+      box-shadow: 0 0 10px rgba(5, 240, 161, 0.15);
+      background: rgba(0, 0, 0, 0.6);
+    }
+
+    .form-textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .form-select option {
+      background: #0f162a;
+      color: var(--text-primary);
+    }
+
+    /* Premium Buttons */
+    .btn-premium {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.8rem 1.5rem;
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: var(--transition-smooth);
+      text-decoration: none;
+    }
+
+    .btn-save {
+      background: #05f0a1;
+      color: #030712;
+      box-shadow: 0 4px 14px rgba(5, 240, 161, 0.2);
+    }
+
+    .btn-save:hover {
+      background: #04d48e;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(5, 240, 161, 0.35);
+    }
+
+    .btn-delete {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: #ef4444;
+    }
+
+    .btn-delete:hover {
+      background: #ef4444;
+      color: #ffffff;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(239, 68, 68, 0.35);
+    }
+
+    .btn-edit {
+      background: rgba(59, 130, 246, 0.15);
+      border-color: rgba(59, 130, 246, 0.3);
+      color: #3b82f6;
+    }
+
+    .btn-edit:hover {
+      background: #3b82f6;
+      color: #ffffff;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(59, 130, 246, 0.35);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--border-color);
+      color: var(--text-primary);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--border-color-hover);
+    }
+
+    .btn-generate {
+      background: rgba(99, 102, 241, 0.15);
+      border-color: rgba(99, 102, 241, 0.3);
+      color: #818cf8;
+      font-size: 0.8rem;
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      align-self: center;
+    }
+
+    .btn-generate:hover {
+      background: #6366f1;
+      color: #ffffff;
+    }
+
+    /* Photo Upload Zone */
+    .upload-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    @media (min-width: 576px) {
+      .upload-row {
+        grid-template-columns: 1.2fr 0.8fr;
+      }
+    }
+
+    .upload-zone {
+      border: 2px dashed var(--border-color);
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-align: center;
+      background: rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+      transition: var(--transition-smooth);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .upload-zone:hover,
+    .upload-zone.dragover {
+      border-color: #05f0a1;
+      background: rgba(5, 240, 161, 0.03);
+    }
+
+    .upload-icon {
+      color: var(--text-muted);
+      transition: var(--transition-smooth);
+    }
+
+    .upload-zone:hover .upload-icon {
+      color: #05f0a1;
+      transform: translateY(-2px);
+    }
+
+    .upload-text {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .upload-subtext {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    /* Live Preview Section */
+    .preview-column {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.5rem;
+      position: sticky;
+      top: 2rem;
+    }
+
+    .preview-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      align-self: flex-start;
+    }
+
+    .preview-card-wrapper {
+      transform: scale(0.95);
+      transform-origin: top center;
+    }
+
+    /* Member List Table */
+    .admin-controls-bar {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .admin-search-input {
+      flex: 1;
+      min-width: 250px;
+    }
+
+    .admin-table-container {
+      overflow-x: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+
+    .admin-table th {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 1rem 1.25rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border-color);
+      text-transform: uppercase;
+      font-size: 0.785rem;
+      letter-spacing: 0.05em;
+    }
+
+    .admin-table td {
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      color: var(--text-primary);
+      vertical-align: middle;
+    }
+
+    .admin-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .admin-table tbody tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .admin-member-cell {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .admin-avatar-mini {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .admin-member-name {
+      font-weight: 600;
+    }
+
+    .admin-member-id {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .admin-tier-badge {
+      display: inline-flex;
+      padding: 0.25rem 0.5rem;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .badge-leadership {
+      background: rgba(79, 172, 254, 0.15);
+      color: #00f2fe;
+      border: 1px solid rgba(79, 172, 254, 0.3);
+    }
+
+    .badge-core {
+      background: rgba(5, 240, 161, 0.15);
+      color: #05f0a1;
+      border: 1px solid rgba(5, 240, 161, 0.3);
+    }
+
+    .badge-member {
+      background: rgba(255, 117, 140, 0.15);
+      color: #ff758c;
+      border: 1px solid rgba(255, 117, 140, 0.3);
+    }
+
+    .admin-status-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+    }
+
+    .admin-table-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    /* Database settings css */
+    .db-settings-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+
+    @media (min-width: 768px) {
+      .db-settings-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .db-box {
+      border: 1px solid var(--border-color);
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 16px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .db-box h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.25rem;
+      color: var(--text-primary);
+    }
+
+    .db-box p {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
+    .db-code-block {
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      padding: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.75rem;
+      color: #a5b4fc;
+      max-height: 150px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+
+    .toast-notification {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: #0f172a;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-left: 4px solid #05f0a1;
+      padding: 1rem 1.5rem;
+      border-radius: 12px;
+      color: var(--text-primary);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      z-index: 2000;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+    }
+
+    .toast-notification.show {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .toast-notification.error {
+      border-left-color: #ef4444;
+    }
+
+    /* Portal Lock Access Footer Link */
+    .portal-link {
+      display: flex;
+      justify-content: center;
+      margin: 4rem 0 2rem 0;
+    }
+
+    .btn-portal {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      opacity: 0.6;
+      transition: var(--transition-smooth);
+    }
+
+    .btn-portal:hover {
+      opacity: 1;
+      color: #05f0a1;
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="container" id="publicView">
+    <!-- Brand Logo -->
+    <div class="brand-logo-container" id="brandLogoContainer" style="cursor: pointer;"
+      title="Double click to access admin portal">
+      <img src="Copy of IEDC LOGOS.png" alt="IEDC Logo" class="brand-logo" id="mainBrandLogo">
+    </div>
+
+    <!-- Header -->
+    <header>
+      <h1>Innovators Directory</h1>
+      <p class="subtitle">Meet the minds behind the mission</p>
+    </header>
+
+    <!-- Controls (Search & Filters) -->
+    <div class="controls-wrapper">
+      <div class="search-box-container">
+        <input type="text" id="searchInput" class="search-input" placeholder="Search by name, role or skill...">
+        <i data-lucide="search" style="width: 18px; height: 18px;"></i>
+      </div>
+      <div class="filter-tabs" id="filterTabs">
+        <button class="filter-tab active" data-filter="all">All Tiers</button>
+        <button class="filter-tab" data-filter="leadership">Leadership</button>
+        <button class="filter-tab" data-filter="core">Core Committee</button>
+        <button class="filter-tab" data-filter="member">General Members</button>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" id="emptyState">
+      <i data-lucide="user-x" style="width: 48px; height: 48px;"></i>
+      <h3>No Members Found</h3>
+      <p>Try resetting your search filters or typing a different keyword.</p>
+    </div>
+
+    <!-- TIER 1: LEADERSHIP SECTION -->
+    <div class="section-tier" id="tier-leadership">
+      <div class="section-header">
+        <h2 class="section-title">Executive Board & Leadership</h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="card-grid" id="grid-leadership">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+
+    <!-- TIER 2: CORE COMMITTEE SECTION -->
+    <div class="section-tier" id="tier-core">
+      <div class="section-header">
+        <h2 class="section-title">Core Committees</h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="card-grid" id="grid-core">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+
+    <!-- TIER 3: GENERAL MEMBERS SECTION -->
+    <div class="section-tier" id="tier-member">
+      <div class="section-header">
+        <h2 class="section-title">General Members</h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="card-grid" id="grid-member">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+
+    <!-- Portal Lock Access Footer Link -->
+    <div class="portal-link">
+      <a href="#/admin" class="btn-portal">
+        <i data-lucide="lock" style="width: 12px; height: 12px;"></i> Portal Access
+      </a>
+    </div>
+  </div>
+
+  <!-- ADMIN PORTAL VIEW -->
+  <div class="admin-view" id="adminView">
+    <div class="admin-header">
+      <div style="display: flex; align-items: center; gap: 1rem;">
+        <img src="Copy of IEDC LOGOS.png" alt="IEDC Logo" style="height: 45px; width: auto; object-fit: contain;">
+        <h1 style="font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em;">Admin Portal</h1>
+      </div>
+      <button class="btn-premium btn-secondary" onclick="window.location.hash = ''">
+        <i data-lucide="eye" style="width: 16px; height: 16px;"></i> View Directory
+      </button>
+    </div>
+
+    <!-- Admin Navigation Tabs -->
+    <div class="admin-nav" id="adminNav">
+      <button class="admin-nav-btn active" data-tab="list">
+        <i data-lucide="users" style="width: 16px; height: 16px;"></i> All Members
+      </button>
+      <button class="admin-nav-btn" data-tab="form" id="tabBtnForm">
+        <i data-lucide="user-plus" style="width: 16px; height: 16px;"></i> Add Member
+      </button>
+      <button class="admin-nav-btn" data-tab="settings">
+        <i data-lucide="database" style="width: 16px; height: 16px;"></i> Database Settings
+      </button>
+    </div>
+
+    <!-- TAB 1: ALL MEMBERS LIST -->
+    <div class="admin-tab-panel" id="panel-list">
+      <div class="admin-card">
+        <div class="admin-card-title">
+          <i data-lucide="users" style="width: 20px; height: 20px; color: #05f0a1;"></i>
+          <span>Member Directory Control Panel</span>
+        </div>
+
+        <div class="admin-controls-bar">
+          <input type="text" id="adminSearchInput" class="form-control admin-search-input"
+            placeholder="Search members by name, role, ID...">
+          <button class="btn-premium btn-save" onclick="openAddForm()">
+            <i data-lucide="user-plus" style="width: 16px; height: 16px;"></i> Add New Member
+          </button>
+        </div>
+
+        <div class="admin-table-container">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Member</th>
+                <th>Role & Dept</th>
+                <th>Tier</th>
+                <th>Joined</th>
+                <th>Status</th>
+                <th style="width: 100px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="adminTableBody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: ADD/EDIT MEMBER FORM -->
+    <div class="admin-tab-panel" id="panel-form" style="display: none;">
+      <div class="admin-grid-two-col">
+        <!-- Form Column -->
+        <div class="admin-card">
+          <div class="admin-card-title" id="formTitleText">
+            <i data-lucide="user-plus" style="width: 20px; height: 20px; color: #05f0a1;"></i>
+            <span>Add New Member Card</span>
+          </div>
+
+          <form id="memberForm" onsubmit="saveMember(event)">
+            <input type="hidden" id="editOriginalId">
+
+            <div class="form-grid-two-col" style="margin-bottom: 1.25rem;">
+              <div class="form-group">
+                <label class="form-label" for="member_id">Member ID</label>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                  <input type="text" id="member_id" class="form-control" style="flex: 1;"
+                    placeholder="e.g. iedc-exe-0003" required>
+                  <button type="button" class="btn-premium btn-generate" onclick="autoGenerateMemberId()"
+                    style="margin: 0;">Auto ID</button>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="member_name">Full Name</label>
+                <input type="text" id="member_name" class="form-control" placeholder="e.g. John Doe" required>
+              </div>
+            </div>
+
+            <div class="form-grid-three-col" style="margin-bottom: 1.25rem;">
+              <div class="form-group">
+                <label class="form-label" for="member_role">Role Title</label>
+                <input type="text" id="member_role" class="form-control" placeholder="e.g. Creative Lead" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="member_dept">Department / Committee</label>
+                <input type="text" id="member_dept" class="form-control" placeholder="e.g. Creative Committee">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="member_sidebarRole">Sidebar Display Role</label>
+                <input type="text" id="member_sidebarRole" class="form-control" placeholder="e.g. Designer (Optional)">
+              </div>
+            </div>
+
+            <div class="form-grid-three-col" style="margin-bottom: 1.25rem;">
+              <div class="form-group">
+                <label class="form-label" for="member_tier">Directory Tier</label>
+                <select id="member_tier" class="form-select" required>
+                  <option value="leadership">Executive Board & Leadership</option>
+                  <option value="core">Core Committee</option>
+                  <option value="member">General Member</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="member_joined">Joined Date</label>
+                <input type="text" id="member_joined" class="form-control" placeholder="e.g. Jun 2024" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="member_status">Member Status</label>
+                <select id="member_status" class="form-select">
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-grid-three-col" style="margin-bottom: 1.25rem;">
+              <div class="form-group">
+                <label class="form-label" for="member_email">Email Address</label>
+                <input type="email" id="member_email" class="form-control" placeholder="e.g. email@domain.com" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="member_linkedin">LinkedIn URL</label>
+                <input type="url" id="member_linkedin" class="form-control"
+                  placeholder="e.g. https://linkedin.com/in/username">
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="member_github">GitHub URL</label>
+                <input type="url" id="member_github" class="form-control"
+                  placeholder="e.g. https://github.com/username">
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+              <label class="form-label" for="member_skills">Core Capabilities (comma-separated)</label>
+              <input type="text" id="member_skills" class="form-control" placeholder="e.g. Figma, Photoshop, Branding">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+              <label class="form-label" for="member_bio">Short Professional Bio</label>
+              <textarea id="member_bio" class="form-textarea"
+                placeholder="Explain the member's profile description..."></textarea>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.5rem;">
+              <label class="form-label">Profile Photo (Drag & Drop or URL)</label>
+              <div class="upload-row">
+                <div class="upload-zone" id="uploadDropZone">
+                  <input type="file" id="member_photo_file" accept="image/*" style="display: none;">
+                  <i data-lucide="upload-cloud" class="upload-icon" style="width: 32px; height: 32px;"></i>
+                  <span class="upload-text">Drag & drop photo here or <strong>browse</strong></span>
+                  <span class="upload-subtext">JPG, PNG, WebP supported. Re-sized automatically.</span>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 0.5rem; justify-content: space-between;">
+                  <div class="form-group">
+                    <label class="form-label" for="member_photo_url" style="font-size: 0.75rem;">Or Image URL</label>
+                    <input type="text" id="member_photo_url" class="form-control" placeholder="https://image-path.jpg"
+                      style="padding: 0.5rem 0.75rem; font-size: 0.85rem;">
+                  </div>
+                  <button type="button" class="btn-premium btn-secondary" style="font-size: 0.8rem; padding: 0.5rem;"
+                    onclick="document.getElementById('member_photo_file').click()">
+                    <i data-lucide="image" style="width: 14px; height: 14px;"></i> Select File
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div
+              style="display: flex; gap: 1rem; justify-content: flex-end; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 1.5rem;">
+              <button type="button" class="btn-premium btn-secondary" onclick="cancelForm()">Cancel</button>
+              <button type="submit" class="btn-premium btn-save">
+                <i data-lucide="save" style="width: 16px; height: 16px;"></i> Save Member Card
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Live Preview Column -->
+        <div class="preview-column">
+          <div class="preview-title">Live ID Card Preview</div>
+          <div class="preview-card-wrapper" id="previewCardWrapper">
+            <!-- Simulated ID Card -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: DATABASE SETTINGS -->
+    <div class="admin-tab-panel" id="panel-settings" style="display: none;">
+      <div class="admin-card">
+        <div class="admin-card-title">
+          <i data-lucide="database" style="width: 20px; height: 20px; color: #05f0a1;"></i>
+          <span>Database Administration & Portability</span>
+        </div>
+
+        <div class="db-settings-grid">
+          <!-- Export -->
+          <div class="db-box">
+            <h3>Export Directory Database</h3>
+            <p>Save and extract your complete directory data to a JSON format. You can download it as a file, or copy
+              the JS array snippet to overwrite the hardcoded <code>membersData</code> array inside the source HTML file
+              for a permanent update.</p>
+            <div style="display: flex; gap: 0.75rem; margin-top: auto;">
+              <button class="btn-premium btn-secondary" onclick="exportDataJSON()">
+                <i data-lucide="download" style="width: 16px; height: 16px;"></i> Download JSON
+              </button>
+              <button class="btn-premium btn-edit" onclick="copyDataJSCode()">
+                <i data-lucide="copy" style="width: 16px; height: 16px;"></i> Copy JS Code
+              </button>
+            </div>
+            <div class="db-code-block" id="exportedCodePreview" style="display: none;"></div>
+          </div>
+
+          <!-- Import -->
+          <div class="db-box">
+            <h3>Import Directory Database</h3>
+            <p>Upload an exported directory JSON file to update or restore the directory database.
+              <strong>Warning:</strong> This will overwrite the current database in local storage.</p>
+            <div style="display: flex; flex-direction: column; gap: 0.75rem; margin-top: auto;">
+              <input type="file" id="dbImportFile" accept=".json" style="display: none;"
+                onchange="importDataJSON(event)">
+              <button class="btn-premium btn-save" onclick="document.getElementById('dbImportFile').click()">
+                <i data-lucide="upload" style="width: 16px; height: 16px;"></i> Upload JSON File
+              </button>
+              <textarea id="dbImportTextarea" class="form-textarea" placeholder="Or paste JSON raw text here..."
+                style="font-size: 0.8rem; font-family: monospace; min-height: 80px;"></textarea>
+              <button class="btn-premium btn-secondary" style="font-size: 0.8rem; padding: 0.5rem;"
+                onclick="importDataText()">Import Text Raw</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Factory Reset -->
+        <div style="margin-top: 2rem; border-top: 1px solid rgba(239, 68, 68, 0.2); padding-top: 1.5rem;">
+          <h3
+            style="color: #ef4444; font-size: 1.1rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+            <i data-lucide="alert-triangle" style="width: 18px; height: 18px;"></i> Danger Zone
+          </h3>
+          <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+            Reset the directory data to its factory layout. This will purge all modifications saved in local storage and
+            restore the original pre-configured directory list.
+          </p>
+          <button class="btn-premium btn-delete" onclick="resetDatabaseToDefault()">
+            <i data-lucide="refresh-cw" style="width: 16px; height: 16px;"></i> Reset to Factory Default
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div class="toast-notification" id="toastNotification">
+    <i data-lucide="info" id="toastIcon" style="width: 18px; height: 18px; color: #05f0a1;"></i>
+    <span id="toastMessage">Database updated successfully!</span>
+  </div>
+
+  <!-- DETAILS MODAL -->
+  <div class="modal-overlay" id="detailModal">
+    <div class="modal-card">
+      <button class="modal-close-btn" id="modalCloseBtn">
+        <i data-lucide="x" style="width: 18px; height: 18px;"></i>
+      </button>
+
+      <div class="modal-avatar" id="modalAvatarContainer">
+        <img id="modalAvatar" src="" alt="Profile Image">
+      </div>
+
+      <h2 class="modal-name" id="modalName"></h2>
+      <div class="modal-role" id="modalRole"></div>
+
+      <div class="modal-badge-info">
+        <div class="info-block">
+          <div class="info-label">Member ID</div>
+          <div class="info-value mono" id="modalId"></div>
+        </div>
+        <div class="info-block">
+          <div class="info-label">Joined Date</div>
+          <div class="info-value" id="modalJoined"></div>
+        </div>
+      </div>
+
+      <p class="modal-bio" id="modalBio"></p>
+
+      <div class="modal-skills">
+        <div class="modal-skills-title">Core Capabilities</div>
+        <div class="modal-skills-grid" id="modalSkillsGrid">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <div class="modal-footer-socials">
+        <a href="#" target="_blank" class="modal-social-btn linkedin" id="modalLinkedin">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-linkedin" style="display: inline-block; vertical-align: middle;">
+            <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
+            <rect x="2" y="9" width="4" height="12"></rect>
+            <circle cx="4" cy="4" r="2"></circle>
+          </svg> LinkedIn
+        </a>
+        <a href="#" target="_blank" class="modal-social-btn github" id="modalGithub">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-github" style="display: inline-block; vertical-align: middle;">
+            <path
+              d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
+            </path>
+          </svg> GitHub
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       9. JAVASCRIPT - DATA & DOM MANIPULATION
+       ========================================== -->
+  <script>
+    // Supabase Credentials
+    const supabaseUrl = 'https://vdjcbtaajitzrdlchbdk.supabase.co';
+    const supabaseKey = 'sb_publishable_HmctEXxLzolbXzlzbGpwRw_ZFbkKskm';
+    const supabaseClient = window.supabase ? window.supabase.createClient(supabaseUrl, supabaseKey) : null;
+
+    // 1. Hardcoded Fallback Database
+    const defaultMembersData = [
+      {
+        id: "iedc-exe-0002",
+        name: "Vasil Vafeeque",
+        role: "Assistant Professor",
+        dept: "Dept of Commerce",
+        sidebarRole: "Nodal Officer",
+        tier: "leadership",
+        email: "vasilvafeeque2@gmail.com",
+        linkedin: "https://www.linkedin.com/in/vasil-vafeeque?utm_source=share_via&utm_content=profile&utm_medium=member_android",
+        github: "https://github.com",
+        avatar: "data:image/jpeg;base64,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",
+        joined: "Jun 2023",
+        bio: "Nodal Officer of IEDC SIAS. Assistant Professor in the Department of Commerce, facilitating entrepreneurship, innovation, and leadership growth among students.",
+        skills: ["Commerce", "Mentorship", "Innovation", "Management", "Leadership"],
+        status: "active"
+      },
+      {
+        id: "CLB-001",
+        name: "Jane Doe",
+        role: "President",
+        tier: "leadership",
+        email: "jane.doe@club.org",
+        linkedin: "https://linkedin.com",
+        github: "https://github.com",
+        avatar: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&q=80&w=400&h=400",
+        joined: "Jan 2024",
+        bio: "Visionary leader with a passion for building cross-functional communities. Orchestrates club-wide strategies, handles partnerships, and aligns goals with real-world industry applications.",
+        skills: ["Strategy", "Public Speaking", "Partnerships", "Negotiation", "Leadership"],
+        status: "active"
+      },
+      {
+        id: "CLB-002",
+        name: "Marcus Chen",
+        role: "Vice President",
+        tier: "leadership",
+        email: "marcus.chen@club.org",
+        linkedin: "https://linkedin.com",
+        github: "https://github.com",
+        avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=400&h=400",
+        joined: "Feb 2024",
+        bio: "Specialist in operational excellence and systems design. Connects the executive vision to functional committees, ensuring seamless project execution and platform scaling.",
+        skills: ["Operations", "Web3", "Product Mgmt", "Scrum", "Risk Assessment"],
+        status: "active"
+      },
+      {
+        id: "CLB-003",
+        name: "Sarah Jenkins",
+        role: "General Secretary",
+        tier: "leadership",
+        email: "sarah.j@club.org",
+        linkedin: "https://linkedin.com",
+        github: "https://github.com",
+        avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&q=80&w=400&h=400",
+        joined: "Mar 2024",
+        bio: "Organizes corporate relations, documents structural progress, and leads communication pathways across external organizations and advisory boards.",
+        skills: ["Administration", "Corporate Relations", "Writing", "Public Policy"],
+        status: "active"
+      },
+      {
+        id: "CLB-011",
+        name: "Elena Rostova",
+        role: "Head of Tech",
+        tier: "core",
+        email: "elena.r@club.org",
+        linkedin: "https://linkedin.com",
+        github: "https://github.com",
+        avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=400&h=400",
+        joined: "May 2024",
+        bio: "Full stack wizard and cloud solutions architect. Oversees core development teams, selects technical frameworks, and maintains production servers and deployment systems.",
+        skills: ["React", "Node.js", "AWS Cloud", "Docker", "System Design"],
+        status: "active"
+      },
+      {
+        id: "CLB-012",
+        name: "David Kim",
+        role: "Creative Director",
+        tier: "core",
+        email: "david.k@club.org",
+        linkedin: "https://linkedin.com",
+        github: "https://github.com",
+        avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=400&h=400",
+        joined: "Jun 2024",
+        bio: "Award-winning designer focusing on interactive user experiences. Guides the artistic style, branding guidelines, and visual narrative across web interfaces and merchandise.",
+        skills: ["Figma", "Branding", "Motion Design", "Cinema4D", "Prototyping"],
+        status: "active"
+      },
+      {
+        id: "CLB-013",
+        name: "Aisha Bello",
+        role: "Operations Lead",
+        tier: "core",
+        email: "aisha.b@club.org",
+        linkedin: "https://linkedin.com",
+        github: "https://github.com",
+        avatar: "https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?auto=format&fit=crop&q=80&w=400&h=400",
+        joined: "Jul 2024",
+        bio: "Event manager and logistics mastermind. Leads large-scale campus hackathons and seminars, coordinating sponsor exhibits, vendor pipelines, and speaker hospitality.",
+        skills: ["Event Mgmt", "Public Relations", "Budgeting", "Logistics", "PR"],
+        status: "active"
+      },
+      {
+        id: "CLB-051",
+        name: "Liam Thompson",
+        role: "Frontend Dev",
+        tier: "member",
+        email: "liam.t@club.org",
+        linkedin: "https://linkedin.com",
+        github: "https://github.com",
+        avatar: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&q=80&w=400&h=400",
+        joined: "Sep 2024",
+        bio: "Aspiring software engineer specializing in interactive responsive websites, smooth CSS transitions, and modular frontend architectures.",
+        skills: ["Vue.js", "Tailwind CSS", "JavaScript", "Webpack", "CSS Grid"],
+        status: "active"
+      },
+      {
+        id: "CLB-052",
+        name: "Sofia Martinez",
+        role: "UX Designer",
+        tier: "member",
+        email: "sofia.m@club.org",
+        linkedin: "https://linkedin.com",
+        github: "https://github.com",
+        avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=400&h=400",
+        joined: "Oct 2024",
+        bio: "Focuses on user research and building comprehensive design systems. Translates customer discovery insights into low and high-fidelity wireframes.",
+        skills: ["User Research", "Wireframing", "Figma", "Adobe Suite", "UI Systems"],
+        status: "active"
+      },
+      {
+        id: "CLB-053",
+        name: "Rajesh Patel",
+        role: "Full Stack Eng",
+        tier: "member",
+        email: "rajesh.p@club.org",
+        linkedin: "https://linkedin.com",
+        github: "https://github.com",
+        avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=400&h=400",
+        joined: "Nov 2024",
+        bio: "Backend specialist with database administration skills. Ensures security protocols, creates scalable APIs, and optimizes relational databases.",
+        skills: ["Python", "Django", "PostgreSQL", "REST APIs", "Redis"],
+        status: "active"
+      },
+      {
+        id: "CLB-054",
+        name: "Zoe Dupont",
+        role: "Marketing Assoc",
+        tier: "member",
+        email: "zoe.d@club.org",
+        linkedin: "https://linkedin.com",
+        github: "https://github.com",
+        avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=400&h=400",
+        joined: "Dec 2024",
+        bio: "Creative copywriter and social media marketer. Focuses on content planning, SEO marketing, analytics tracking, and newsletter publication.",
+        skills: ["SEO", "Content Planning", "Analytics", "Copywriting", "Email campaigns"],
+        status: "active"
+      }
+    ];
+
+    // Clean inline SVG avatar fallback when no photo is uploaded
+    const defaultAvatar = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="%2364748b" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
+
+    let membersData = [];
+
+    // Initialize Database
+    async function initDatabase() {
+      if (supabaseClient) {
+        try {
+          const { data, error } = await supabaseClient.from('members').select('*');
+          if (error) throw error;
+
+          if (data && data.length > 0) {
+            // Map pg column sidebar_role (snake_case) to JS property sidebarRole (camelCase)
+            membersData = data.map(item => {
+              const member = { ...item, sidebarRole: item.sidebar_role };
+              delete member.sidebar_role;
+              return member;
+            });
+            // Update local cache fallback
+            saveDatabaseToStorage();
+          } else {
+            console.log("Supabase table is empty. Seeding with default data...");
+            membersData = JSON.parse(JSON.stringify(defaultMembersData));
+            await seedDatabase();
+          }
+        } catch (e) {
+          console.error("Failed to connect or fetch from Supabase, loading local storage cache:", e);
+          loadLocalStorageFallback();
+        }
+      } else {
+        loadLocalStorageFallback();
+      }
+    }
+
+    function loadLocalStorageFallback() {
+      const stored = localStorage.getItem('iedc_directory_data');
+      if (stored) {
+        try {
+          membersData = JSON.parse(stored);
+        } catch (e) {
+          console.error("Failed to parse stored members, reverting to default.", e);
+          membersData = JSON.parse(JSON.stringify(defaultMembersData));
+        }
+      } else {
+        membersData = JSON.parse(JSON.stringify(defaultMembersData));
+        saveDatabaseToStorage();
+      }
+    }
+
+    async function seedDatabase() {
+      if (!supabaseClient) return;
+      try {
+        // Map camelCase to snake_case for DB columns
+        const mappedData = defaultMembersData.map(m => {
+          const row = { ...m, sidebar_role: m.sidebarRole };
+          delete row.sidebarRole;
+          return row;
+        });
+        const { error } = await supabaseClient.from('members').upsert(mappedData);
+        if (error) throw error;
+        saveDatabaseToStorage();
+        console.log("Database seeded successfully with default members!");
+      } catch (err) {
+        console.error("Failed to seed Supabase database:", err);
+      }
+    }
+
+    function saveDatabaseToStorage() {
+      localStorage.setItem('iedc_directory_data', JSON.stringify(membersData));
+    }
+
+    // 2. DOM Elements
+    const searchInput = document.getElementById('searchInput');
+    const filterTabs = document.getElementById('filterTabs');
+    const emptyState = document.getElementById('emptyState');
+
+    const grids = {
+      leadership: document.getElementById('grid-leadership'),
+      core: document.getElementById('grid-core'),
+      member: document.getElementById('grid-member')
+    };
+
+    const sections = {
+      leadership: document.getElementById('tier-leadership'),
+      core: document.getElementById('tier-core'),
+      member: document.getElementById('tier-member')
+    };
+
+    // Modal Elements
+    const detailModal = document.getElementById('detailModal');
+    const modalCloseBtn = document.getElementById('modalCloseBtn');
+    const modalAvatar = document.getElementById('modalAvatar');
+    const modalName = document.getElementById('modalName');
+    const modalRole = document.getElementById('modalRole');
+    const modalId = document.getElementById('modalId');
+    const modalJoined = document.getElementById('modalJoined');
+    const modalBio = document.getElementById('modalBio');
+    const modalSkillsGrid = document.getElementById('modalSkillsGrid');
+    const modalLinkedin = document.getElementById('modalLinkedin');
+    const modalGithub = document.getElementById('modalGithub');
+    const modalAvatarContainer = document.getElementById('modalAvatarContainer');
+
+    // 3. Render Public Cards
+    function renderDirectory() {
+      // Clear existing grids
+      Object.values(grids).forEach(grid => grid.innerHTML = '');
+
+      // Get filter and search values
+      const activeFilter = filterTabs.querySelector('.filter-tab.active').dataset.filter;
+      const searchQuery = searchInput.value.toLowerCase().trim();
+
+      let visibleCount = 0;
+      const tierCounts = { leadership: 0, core: 0, member: 0 };
+
+      membersData.forEach(member => {
+        // Only show active members in public directory
+        if (member.status === 'inactive') return;
+
+        // Filter logic: Check if matches active tab category
+        const matchesFilter = (activeFilter === 'all' || member.tier === activeFilter);
+
+        // Search logic: check name, role, or skills
+        const matchesSearch = member.name.toLowerCase().includes(searchQuery) ||
+          member.role.toLowerCase().includes(searchQuery) ||
+          (member.skills && member.skills.some(skill => skill.toLowerCase().includes(searchQuery)));
+
+        if (matchesFilter && matchesSearch) {
+          tierCounts[member.tier]++;
+          visibleCount++;
+
+          // Generate ID card elements
+          const card = createCardElement(member);
+          grids[member.tier].appendChild(card);
+
+          // Generate QR code for this card
+          generateQRCode(member);
+        }
+      });
+
+      // Show/Hide section containers depending on whether they contain cards
+      Object.keys(sections).forEach(tier => {
+        if (tierCounts[tier] > 0) {
+          sections[tier].style.display = 'block';
+        } else {
+          sections[tier].style.display = 'none';
+        }
+      });
+
+      // Handle Empty State
+      if (visibleCount === 0) {
+        emptyState.style.display = 'flex';
+      } else {
+        emptyState.style.display = 'none';
+      }
+
+      // Re-initialize Lucide Icons for dynamic content
+      lucide.createIcons();
+    }
+
+    // Helper to generate a QR Code linking to the member's profile modal
+    function generateQRCode(member, isPreview = false) {
+      const targetId = isPreview ? 'qr-preview' : `qr-${member.id}`;
+      const qrElem = document.getElementById(targetId);
+      if (qrElem) {
+        qrElem.innerHTML = '';
+
+        // Dynamically build the profile URL (current page URL + member ID hash)
+        const profileUrl = isPreview ? window.location.href.split('#')[0] : window.location.href.split('#')[0] + '#' + member.id;
+
+        new QRCode(qrElem, {
+          text: profileUrl,
+          width: 39,
+          height: 39,
+          colorDark: "#000000",
+          colorLight: "#ffffff",
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      }
+    }
+
+    // Helper to generate unique horizontal barcode lines based on member ID
+    function generateBarcodeSVG(memberId) {
+      let hash = 0;
+      for (let i = 0; i < memberId.length; i++) {
+        hash = memberId.charCodeAt(i) + ((hash << 5) - hash);
+      }
+
+      let seed = Math.abs(hash);
+      function nextRandom() {
+        seed = (seed * 9301 + 49297) % 233280;
+        return seed / 233280;
+      }
+
+      let svgLines = '';
+      let currentY = 2;
+      const maxHeight = 85;
+
+      while (currentY < maxHeight - 3) {
+        const rand = nextRandom();
+        const thickness = rand > 0.45 ? (rand > 0.8 ? 3 : 1.5) : 0.8;
+        const spacing = 1.5 + nextRandom() * 4.0;
+
+        svgLines += `<rect x="0" y="${currentY}" width="26" height="${thickness}" fill="#ffffff" opacity="0.85" />`;
+        currentY += thickness + spacing;
+      }
+
+      return `
+        <svg width="26" height="${maxHeight}" viewBox="0 0 26 ${maxHeight}" xmlns="http://www.w3.org/2000/svg">
+          ${svgLines}
+        </svg>
+      `;
+    }
+
+    // Helper to generate a single ID card's HTML elements
+    function createCardElement(member, isPreview = false) {
+      const card = document.createElement('div');
+      card.className = `id-card tier-${member.tier}`;
+      card.setAttribute('data-id', isPreview ? 'preview' : member.id);
+
+      // Department mapping based on role/tier
+      let deptName = member.dept ? member.dept.toUpperCase() : "MEMBER";
+      if (!member.dept) {
+        if (member.tier === "leadership") {
+          deptName = "EXECUTIVE BOARD";
+        } else if (member.role.toLowerCase().includes("tech") || member.role.toLowerCase().includes("frontend") || member.role.toLowerCase().includes("full stack")) {
+          deptName = "TECHNICAL COMMITTEE";
+        } else if (member.role.toLowerCase().includes("creative") || member.role.toLowerCase().includes("ux") || member.role.toLowerCase().includes("design")) {
+          deptName = "CREATIVE COMMITTEE";
+        } else if (member.role.toLowerCase().includes("operations")) {
+          deptName = "OPERATIONS COMMITTEE";
+        } else if (member.role.toLowerCase().includes("marketing")) {
+          deptName = "MARKETING COMMITTEE";
+        }
+      }
+
+      // Sidebar badge role text mapping
+      let sidebarRoleText = member.sidebarRole || member.role;
+      const qrId = isPreview ? 'qr-preview' : `qr-${member.id}`;
+      const barcodeValue = isPreview ? 'preview id' : member.id.toLowerCase().replace('-', ' ');
+      const avatarSrc = member.avatar || defaultAvatar; // default fallback image if empty
+
+      card.innerHTML = `
+        <div class="card-left">
+          <div class="photo-strip">
+            <img class="photo-image" src="${avatarSrc}" alt="${member.name || 'Preview'}">
+          </div>
+          <div class="photo-spacer" style="height: 195px; width: 100%;"></div>
+          <h3 class="member-name">${member.name || 'MEMBER NAME'}</h3>
+          <div class="role-details">
+            <div class="role-title">${member.role || 'ROLE TITLE'}</div>
+            <div class="role-dept">${deptName}</div>
+          </div>
+          <div class="card-left-footer">
+            <div class="footer-qr-section">
+              <span class="id-badge-code">${(member.id || 'id_preview').toLowerCase().replace('-', '_')}</span>
+            </div>
+            <div class="social-links" onclick="event.stopPropagation()">
+              <a href="${member.linkedin || '#'}" target="_blank" class="social-link linkedin-btn" aria-label="LinkedIn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-linkedin" style="display: inline-block; vertical-align: middle;"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+              </a>
+              <a href="mailto:${member.email || ''}" class="social-link email" aria-label="Email">
+                <i data-lucide="mail" style="width: 12px; height: 12px;"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="card-right">
+          <img src="Copy of IEDC LOGOS.png" alt="Logo" class="sidebar-logo">
+          <div class="barcode-wrapper">
+            <div class="barcode-container">
+              ${generateBarcodeSVG(member.id || 'preview')}
+            </div>
+            <span class="barcode-text">${barcodeValue}</span>
+          </div>
+          <div class="sidebar-badge">
+            <span class="sidebar-badge-text">${sidebarRoleText || 'MEMBER'}</span>
+          </div>
+        </div>
+      `;
+
+      // Event listener to open modal on card click (only for public view)
+      if (!isPreview) {
+        card.addEventListener('click', () => openModal(member));
+      }
+
+      return card;
+    }
+
+    // 4. Modal Open/Close Logic
+    function openModal(member) {
+      // Dynamic styles based on member tier
+      let accentStart = 'var(--accent-member-start)';
+      let accentEnd = 'var(--accent-member-end)';
+
+      if (member.tier === 'leadership') {
+        accentStart = 'var(--accent-leadership-start)';
+        accentEnd = 'var(--accent-leadership-end)';
+      } else if (member.tier === 'core') {
+        accentStart = 'var(--accent-core-start)';
+        accentEnd = 'var(--accent-core-end)';
+      }
+
+      modalAvatarContainer.style.setProperty('--modal-accent-start', accentStart);
+      modalAvatarContainer.style.setProperty('--modal-accent-end', accentEnd);
+      modalRole.style.setProperty('--modal-accent-start', accentStart);
+      modalRole.style.setProperty('--modal-accent-end', accentEnd);
+
+      // Populate details
+      modalAvatar.src = member.avatar || 'vasil.png';
+      modalAvatar.alt = member.name;
+      modalName.textContent = member.name;
+      modalRole.textContent = member.sidebarRole ? `${member.sidebarRole} / ${member.role}` : member.role;
+      modalId.textContent = member.id;
+      modalJoined.textContent = member.joined;
+      modalBio.textContent = member.bio;
+
+      // Populate capabilities grid
+      modalSkillsGrid.innerHTML = member.skills
+        ? member.skills.map(skill => `<span class="modal-skill-tag">${skill}</span>`).join('')
+        : '';
+
+      // Social URLs
+      modalLinkedin.href = member.linkedin || '#';
+      modalGithub.href = member.github || '#';
+
+      // Show modal
+      detailModal.classList.add('open');
+      document.body.style.overflow = 'hidden'; // Stop scrolling behind modal
+
+      lucide.createIcons();
+    }
+
+    // Helper to close modal
+    function closeModal() {
+      detailModal.classList.remove('open');
+      document.body.style.overflow = ''; // Resume scrolling
+    }
+
+    // 5. Routing Logic (Public vs Admin View)
+    function checkRoute() {
+      const hash = window.location.hash;
+      const publicView = document.getElementById('publicView');
+      const adminView = document.getElementById('adminView');
+
+      if (hash === '#/admin') {
+        publicView.style.display = 'none';
+        adminView.style.display = 'block';
+        initAdminDashboard();
+      } else {
+        publicView.style.display = 'block';
+        adminView.style.display = 'none';
+        renderDirectory();
+
+        // Handle individual member hash route (e.g. #CLB-001)
+        handleHashRoute();
+      }
+    }
+
+    // ==========================================
+    // 6. ADMIN DASHBOARD ACTIONS & EVENT BINDINGS
+    // ==========================================
+    let isAdminInitialized = false;
+    window.uploadedAvatarBase64 = '';
+
+    function initAdminDashboard() {
+      if (isAdminInitialized) {
+        renderAdminTable();
+        return;
+      }
+
+      // Bind navigation tabs
+      const navContainer = document.getElementById('adminNav');
+      navContainer.addEventListener('click', (e) => {
+        const btn = e.target.closest('.admin-nav-btn');
+        if (!btn) return;
+
+        switchAdminTab(btn.dataset.tab);
+      });
+
+      // Bind search input filter
+      document.getElementById('adminSearchInput').addEventListener('input', renderAdminTable);
+
+      // Bind form change listeners for real-time live ID card preview
+      const formInputs = [
+        'member_id', 'member_name', 'member_role', 'member_dept', 'member_sidebarRole',
+        'member_tier', 'member_joined', 'member_email', 'member_linkedin', 'member_github',
+        'member_skills', 'member_bio', 'member_photo_url', 'member_status'
+      ];
+      formInputs.forEach(id => {
+        document.getElementById(id).addEventListener('input', updateLivePreview);
+      });
+
+      // Bind drag and drop zone for photo uploads
+      setupPhotoDropZone();
+
+      // Render default members list
+      renderAdminTable();
+
+      isAdminInitialized = true;
+    }
+
+    function switchAdminTab(tabName) {
+      // Toggle tabs active styling
+      const navContainer = document.getElementById('adminNav');
+      navContainer.querySelectorAll('.admin-nav-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tabName);
+      });
+
+      // Toggle tab panels display
+      const panels = ['panel-list', 'panel-form', 'panel-settings'];
+      panels.forEach(id => {
+        document.getElementById(id).style.display = id === `panel-${tabName}` ? 'block' : 'none';
+      });
+
+      if (tabName === 'list') {
+        renderAdminTable();
+      } else if (tabName === 'form') {
+        updateLivePreview();
+      }
+    }
+
+    // Render Admin List Table
+    function renderAdminTable() {
+      const tableBody = document.getElementById('adminTableBody');
+      tableBody.innerHTML = '';
+
+      const searchQuery = document.getElementById('adminSearchInput').value.toLowerCase().trim();
+
+      membersData.forEach(member => {
+        const matchesSearch = member.name.toLowerCase().includes(searchQuery) ||
+          member.role.toLowerCase().includes(searchQuery) ||
+          member.id.toLowerCase().includes(searchQuery) ||
+          (member.dept && member.dept.toLowerCase().includes(searchQuery));
+
+        if (!matchesSearch) return;
+
+        const row = document.createElement('tr');
+        const avatarSrc = member.avatar || defaultAvatar;
+        const tierName = member.tier === 'leadership' ? 'Leadership' : (member.tier === 'core' ? 'Core Committee' : 'Member');
+
+        row.innerHTML = `
+          <td>
+            <div class="admin-member-cell">
+              <img class="admin-avatar-mini" src="${avatarSrc}" alt="${member.name}">
+              <div>
+                <div class="admin-member-name">${member.name}</div>
+                <div class="admin-member-id">${member.id}</div>
+              </div>
+            </div>
+          </td>
+          <td>
+            <div style="font-weight: 500;">${member.role}</div>
+            <div style="font-size: 0.75rem; color: var(--text-secondary);">${member.dept || ''}</div>
+          </td>
+          <td>
+            <span class="admin-tier-badge badge-${member.tier}">${tierName}</span>
+          </td>
+          <td style="color: var(--text-secondary); font-size: 0.85rem;">${member.joined}</td>
+          <td>
+            <div class="admin-status-toggle" onclick="toggleStatus('${member.id}', event)">
+              <i data-lucide="${member.status === 'active' ? 'check-circle' : 'circle'}" 
+                 style="width: 18px; height: 18px; color: ${member.status === 'active' ? '#05f0a1' : 'var(--text-muted)'};"></i>
+              <span style="font-size: 0.8rem; color: ${member.status === 'active' ? 'var(--text-primary)' : 'var(--text-muted)'}">${member.status === 'active' ? 'Active' : 'Inactive'}</span>
+            </div>
+          </td>
+          <td>
+            <div class="admin-table-actions">
+              <button class="btn-premium btn-edit" style="padding: 0.4rem; border-radius: 6px;" onclick="editMember('${member.id}')" title="Edit Member Card">
+                <i data-lucide="edit-2" style="width: 14px; height: 14px;"></i>
+              </button>
+              <button class="btn-premium btn-delete" style="padding: 0.4rem; border-radius: 6px;" onclick="deleteMember('${member.id}')" title="Delete Member Card">
+                <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+              </button>
+            </div>
+          </td>
+        `;
+        tableBody.appendChild(row);
+      });
+
+      lucide.createIcons();
+    }
+
+    // Toggle Active Status
+    async function toggleStatus(id, event) {
+      event.stopPropagation();
+      const member = membersData.find(m => m.id === id);
+      if (member) {
+        const newStatus = member.status === 'active' ? 'inactive' : 'active';
+        try {
+          if (supabaseClient) {
+            const { error } = await supabaseClient.from('members').update({ status: newStatus }).eq('id', id);
+            if (error) throw error;
+          }
+          member.status = newStatus;
+          saveDatabaseToStorage();
+          renderAdminTable();
+          showToast(`Status of ${member.name} updated to ${member.status}.`);
+        } catch (err) {
+          console.error("Failed to update status in Supabase:", err);
+          showToast("Failed to update status in cloud: " + err.message, true);
+        }
+      }
+    }
+
+    // Add New Member initialization
+    function openAddForm() {
+      // Clear values
+      document.getElementById('memberForm').reset();
+      document.getElementById('editOriginalId').value = '';
+      window.uploadedAvatarBase64 = '';
+      document.getElementById('formTitleText').innerHTML = `<i data-lucide="user-plus" style="width: 20px; height: 20px; color: #05f0a1;"></i> <span>Add New Member Card</span>`;
+
+      switchAdminTab('form');
+      autoGenerateMemberId();
+      updateLivePreview();
+
+      lucide.createIcons();
+    }
+
+    // Edit Member Initialization
+    function editMember(id) {
+      const member = membersData.find(m => m.id === id);
+      if (!member) return;
+
+      document.getElementById('editOriginalId').value = member.id;
+      document.getElementById('member_id').value = member.id;
+      document.getElementById('member_name').value = member.name;
+      document.getElementById('member_role').value = member.role;
+      document.getElementById('member_dept').value = member.dept || '';
+      document.getElementById('member_sidebarRole').value = member.sidebarRole || '';
+      document.getElementById('member_tier').value = member.tier;
+      document.getElementById('member_joined').value = member.joined;
+      document.getElementById('member_status').value = member.status || 'active';
+      document.getElementById('member_email').value = member.email || '';
+      document.getElementById('member_linkedin').value = member.linkedin || '';
+      document.getElementById('member_github').value = member.github || '';
+      document.getElementById('member_skills').value = member.skills ? member.skills.join(', ') : '';
+      document.getElementById('member_bio').value = member.bio || '';
+
+      const isBase64 = member.avatar && member.avatar.startsWith('data:image/');
+      if (isBase64) {
+        window.uploadedAvatarBase64 = member.avatar;
+        document.getElementById('member_photo_url').value = '';
+      } else {
+        window.uploadedAvatarBase64 = '';
+        document.getElementById('member_photo_url').value = member.avatar || '';
+      }
+
+      document.getElementById('formTitleText').innerHTML = `<i data-lucide="edit" style="width: 20px; height: 20px; color: #3b82f6;"></i> <span>Edit Member Card</span>`;
+
+      switchAdminTab('form');
+      updateLivePreview();
+
+      lucide.createIcons();
+    }
+
+    // Delete Member
+    async function deleteMember(id) {
+      const member = membersData.find(m => m.id === id);
+      if (!member) return;
+
+      const confirmDelete = confirm(`Are you absolutely sure you want to delete ${member.name}'s ID card?`);
+      if (confirmDelete) {
+        try {
+          if (supabaseClient) {
+            const { error } = await supabaseClient.from('members').delete().eq('id', id);
+            if (error) throw error;
+          }
+          membersData = membersData.filter(m => m.id !== id);
+          saveDatabaseToStorage();
+          renderAdminTable();
+          showToast(`${member.name}'s card deleted successfully.`);
+        } catch (err) {
+          console.error("Failed to delete member from Supabase:", err);
+          showToast("Failed to delete card from cloud: " + err.message, true);
+        }
+      }
+    }
+
+    // Auto-Generate Unique Member ID
+    function autoGenerateMemberId() {
+      const tier = document.getElementById('member_tier').value;
+      let prefix = 'clb-';
+      if (tier === 'leadership') {
+        prefix = 'iedc-exe-';
+      }
+
+      // Look at existing database numbers to find next available integer
+      let maxNum = 0;
+      membersData.forEach(member => {
+        if (member.id.toLowerCase().startsWith(prefix)) {
+          const numberPart = member.id.slice(prefix.length);
+          const val = parseInt(numberPart, 10);
+          if (!isNaN(val) && val > maxNum) {
+            maxNum = val;
+          }
+        }
+      });
+
+      const nextNum = maxNum + 1;
+      // Pad with zeroes (e.g. iedc-exe-0003 or clb-055)
+      const paddedNum = prefix === 'iedc-exe-'
+        ? String(nextNum).padStart(4, '0')
+        : String(nextNum).padStart(3, '0');
+
+      document.getElementById('member_id').value = prefix + paddedNum;
+      updateLivePreview();
+    }
+
+    // Cancel Form
+    function cancelForm() {
+      document.getElementById('memberForm').reset();
+      window.uploadedAvatarBase64 = '';
+      switchAdminTab('list');
+    }
+
+    // Save Member Submit Form
+    async function saveMember(event) {
+      event.preventDefault();
+
+      const originalId = document.getElementById('editOriginalId').value;
+      const id = document.getElementById('member_id').value.trim();
+      const name = document.getElementById('member_name').value.trim();
+      const role = document.getElementById('member_role').value.trim();
+      const dept = document.getElementById('member_dept').value.trim();
+      const sidebarRole = document.getElementById('member_sidebarRole').value.trim();
+      const tier = document.getElementById('member_tier').value;
+      const joined = document.getElementById('member_joined').value.trim();
+      const status = document.getElementById('member_status').value;
+      const email = document.getElementById('member_email').value.trim();
+      const linkedin = document.getElementById('member_linkedin').value.trim();
+      const github = document.getElementById('member_github').value.trim();
+      const skillsStr = document.getElementById('member_skills').value;
+      const bio = document.getElementById('member_bio').value.trim();
+      const photoUrl = document.getElementById('member_photo_url').value.trim();
+
+      // Check unique ID constraints
+      const idConflict = membersData.some(m => m.id.toLowerCase() === id.toLowerCase() && m.id !== originalId);
+      if (idConflict) {
+        showToast(`Error: The ID "${id}" is already in use by another member!`, true);
+        return;
+      }
+
+      // Convert skills comma list into array
+      const skills = skillsStr ? skillsStr.split(',').map(s => s.trim()).filter(s => s.length > 0) : [];
+
+      // Determine avatar image
+      let avatar = defaultAvatar; // default fallback
+      if (window.uploadedAvatarBase64) {
+        avatar = window.uploadedAvatarBase64;
+      } else if (photoUrl) {
+        avatar = photoUrl;
+      }
+
+      const memberObj = {
+        id, name, role, dept, sidebarRole, tier, email, linkedin, github, avatar, joined, bio, skills, status
+      };
+
+      // UI state loading spinner
+      const form = document.getElementById('memberForm');
+      const saveBtn = form.querySelector('button[type="submit"]');
+      const originalBtnHtml = saveBtn.innerHTML;
+      saveBtn.disabled = true;
+      saveBtn.innerHTML = '<i data-lucide="loader" class="spin" style="width: 16px; height: 16px;"></i> Saving...';
+      lucide.createIcons();
+
+      try {
+        if (supabaseClient) {
+          // If ID was modified, delete the old row first
+          if (originalId && originalId !== id) {
+            const { error: delError } = await supabaseClient.from('members').delete().eq('id', originalId);
+            if (delError) throw delError;
+          }
+
+          // Map for Supabase column mapping (camelCase to snake_case)
+          const dbRow = { ...memberObj, sidebar_role: memberObj.sidebarRole };
+          delete dbRow.sidebarRole;
+
+          const { error: upsertError } = await supabaseClient.from('members').upsert([dbRow]);
+          if (upsertError) throw upsertError;
+        }
+
+        // Update local state model
+        if (originalId) {
+          const index = membersData.findIndex(m => m.id === originalId);
+          if (index !== -1) {
+            if (originalId !== id) {
+              membersData.splice(index, 1);
+              membersData.push(memberObj);
+            } else {
+              membersData[index] = memberObj;
+            }
+          }
+        } else {
+          membersData.push(memberObj);
+        }
+
+        saveDatabaseToStorage();
+        showToast(originalId ? `Successfully updated card details for ${name}.` : `Successfully created new ID card for ${name}!`);
+
+        form.reset();
+        window.uploadedAvatarBase64 = '';
+        switchAdminTab('list');
+      } catch (err) {
+        console.error("Failed to save member in Supabase:", err);
+        showToast("Failed to save member: " + err.message, true);
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = originalBtnHtml;
+        lucide.createIcons();
+      }
+    }
+
+    // Real-Time Live Preview Renderer
+    function updateLivePreview() {
+      const previewWrapper = document.getElementById('previewCardWrapper');
+
+      const id = document.getElementById('member_id').value.trim() || 'clb_preview';
+      const name = document.getElementById('member_name').value.trim() || 'Member Name';
+      const role = document.getElementById('member_role').value.trim() || 'Innovator Role';
+      const dept = document.getElementById('member_dept').value.trim() || 'Committee';
+      const sidebarRole = document.getElementById('member_sidebarRole').value.trim() || '';
+      const tier = document.getElementById('member_tier').value;
+      const joined = document.getElementById('member_joined').value.trim() || 'Jun 2026';
+      const email = document.getElementById('member_email').value.trim() || '';
+      const linkedin = document.getElementById('member_linkedin').value.trim() || '';
+      const github = document.getElementById('member_github').value.trim() || '';
+      const skillsStr = document.getElementById('member_skills').value;
+      const bio = document.getElementById('member_bio').value.trim() || '';
+      const photoUrl = document.getElementById('member_photo_url').value.trim();
+
+      const skills = skillsStr ? skillsStr.split(',').map(s => s.trim()).filter(s => s.length > 0) : [];
+      let avatar = defaultAvatar;
+      if (window.uploadedAvatarBase64) {
+        avatar = window.uploadedAvatarBase64;
+      } else if (photoUrl) {
+        avatar = photoUrl;
+      }
+
+      const dummyMember = {
+        id, name, role, dept, sidebarRole, tier, email, linkedin, github, avatar, joined, bio, skills, status: 'active'
+      };
+
+      // Clean existing render
+      previewWrapper.innerHTML = '';
+
+      // Render card
+      const previewCard = createCardElement(dummyMember, true);
+      previewWrapper.appendChild(previewCard);
+
+      // Render QR
+      generateQRCode(dummyMember, true);
+
+      // Init icons
+      lucide.createIcons();
+    }
+
+    // ==========================================
+    // 7. DRAG-AND-DROP PHOTO UPLOAD SYSTEM
+    // ==========================================
+    function setupPhotoDropZone() {
+      const dropZone = document.getElementById('uploadDropZone');
+      const fileInput = document.getElementById('member_photo_file');
+
+      dropZone.addEventListener('click', () => fileInput.click());
+
+      // Drag Events
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          dropZone.classList.add('dragover');
+        }, false);
+      });
+
+      ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          dropZone.classList.remove('dragover');
+        }, false);
+      });
+
+      // Handle Drop
+      dropZone.addEventListener('drop', (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files.length > 0) {
+          processPhotoFile(files[0]);
+        }
+      }, false);
+
+      // Handle File Input Selection
+      fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+          processPhotoFile(e.target.files[0]);
+        }
+      });
+    }
+
+    // Process & Compress Image File to DataURL
+    function processPhotoFile(file) {
+      if (!file || !file.type.startsWith('image/')) {
+        showToast('Please select a valid image file!', true);
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const img = new Image();
+        img.onload = function () {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          // Re-size to standard avatar dimensions to preserve memory & space
+          const maxDim = 320;
+          if (width > height) {
+            if (width > maxDim) {
+              height = Math.round(height * maxDim / width);
+              width = maxDim;
+            }
+          } else {
+            if (height > maxDim) {
+              width = Math.round(width * maxDim / height);
+              height = maxDim;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Highly compressed JPEG data url
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.75);
+
+          // Store base64 data and clear direct URL input
+          window.uploadedAvatarBase64 = compressedBase64;
+          document.getElementById('member_photo_url').value = '';
+
+          showToast('Image uploaded and optimized successfully.');
+          updateLivePreview();
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // ==========================================
+    // 8. DATABASE BACKUP, RESTORE & EXPORT
+    // ==========================================
+    function exportDataJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(membersData, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", "directory_database.json");
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      showToast("Directory database JSON downloaded successfully.");
+    }
+
+    function copyDataJSCode() {
+      const jsCodeStr = `// Copy and replace this block in directory.html source script to update production default data:\nconst membersData = ${JSON.stringify(membersData, null, 2)};`;
+
+      const codePreview = document.getElementById('exportedCodePreview');
+      codePreview.textContent = jsCodeStr;
+      codePreview.style.display = 'block';
+
+      // Copy to clipboard
+      navigator.clipboard.writeText(jsCodeStr).then(() => {
+        showToast("Database JS Code copied to clipboard!");
+      }).catch(err => {
+        console.error('Could not copy text: ', err);
+        showToast("Code generated. Copy from the textbox below.", true);
+      });
+    }
+
+    function importDataJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          validateAndLoadImportData(parsed);
+        } catch (err) {
+          showToast("Failed to parse JSON file! Check syntax.", true);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function importDataText() {
+      const rawText = document.getElementById('dbImportTextarea').value.trim();
+      if (!rawText) {
+        showToast("Import text box is empty!", true);
+        return;
+      }
+      try {
+        const parsed = JSON.parse(rawText);
+        validateAndLoadImportData(parsed);
+      } catch (err) {
+        showToast("Failed to parse input text. Ensure it is a valid JSON.", true);
+      }
+    }
+
+    async function validateAndLoadImportData(parsedData) {
+      if (!Array.isArray(parsedData)) {
+        showToast("Import failed: Database must be an array.", true);
+        return;
+      }
+
+      // Check fields for the first element as validation
+      if (parsedData.length > 0) {
+        const entry = parsedData[0];
+        if (!entry.id || !entry.name || !entry.role || !entry.tier) {
+          showToast("Import failed: Entries missing required attributes (id, name, role, tier).", true);
+          return;
+        }
+      }
+
+      try {
+        if (supabaseClient) {
+          // Delete existing database records in Supabase
+          const { error: delError } = await supabaseClient.from('members').delete().neq('id', '');
+          if (delError) throw delError;
+
+          // Map properties and insert them in Supabase
+          const mappedRows = parsedData.map(m => {
+            const row = { ...m, sidebar_role: m.sidebarRole };
+            delete row.sidebarRole;
+            return row;
+          });
+          const { error: insertError } = await supabaseClient.from('members').insert(mappedRows);
+          if (insertError) throw insertError;
+        }
+
+        membersData = parsedData;
+        saveDatabaseToStorage();
+        renderAdminTable();
+        renderDirectory();
+
+        document.getElementById('dbImportTextarea').value = '';
+        showToast("Directory database restored successfully!");
+      } catch (err) {
+        console.error("Failed to import database into Supabase:", err);
+        showToast("Failed to import database to cloud: " + err.message, true);
+      }
+    }
+
+    async function resetDatabaseToDefault() {
+      const confirmReset = confirm("CRITICAL WARNING: This will purge all updates, custom members, and uploaded photos in Supabase, restoring the directory to its initial factory default list. Continue?");
+      if (confirmReset) {
+        // Find the danger zone reset button
+        const resetBtn = document.querySelector('.btn-delete');
+        const originalBtnHtml = resetBtn.innerHTML;
+        resetBtn.disabled = true;
+        resetBtn.innerHTML = '<i data-lucide="refresh-cw" class="spin" style="width: 16px; height: 16px;"></i> Resetting...';
+        lucide.createIcons();
+
+        try {
+          if (supabaseClient) {
+            // Delete all rows in members table
+            const { error: delError } = await supabaseClient.from('members').delete().neq('id', '');
+            if (delError) throw delError;
+
+            // Seed database
+            const mappedDefaults = defaultMembersData.map(m => {
+              const row = { ...m, sidebar_role: m.sidebarRole };
+              delete row.sidebarRole;
+              return row;
+            });
+            const { error: insertError } = await supabaseClient.from('members').insert(mappedDefaults);
+            if (insertError) throw insertError;
+          }
+
+          localStorage.removeItem('iedc_directory_data');
+          await initDatabase();
+
+          renderAdminTable();
+          renderDirectory();
+
+          showToast("Database reset to factory default successfully.");
+        } catch (err) {
+          console.error("Failed to reset database in Supabase:", err);
+          showToast("Failed to reset database: " + err.message, true);
+        } finally {
+          resetBtn.disabled = false;
+          resetBtn.innerHTML = originalBtnHtml;
+          lucide.createIcons();
+        }
+      }
+    }
+
+    // ==========================================
+    // 9. TOAST NOTIFICATION UTILITY
+    // ==========================================
+    function showToast(message, isError = false) {
+      const toast = document.getElementById('toastNotification');
+      const toastMsg = document.getElementById('toastMessage');
+      const toastIcon = document.getElementById('toastIcon');
+
+      toastMsg.textContent = message;
+
+      if (isError) {
+        toast.classList.add('error');
+        toastIcon.setAttribute('data-lucide', 'alert-circle');
+        toastIcon.style.color = '#ef4444';
+      } else {
+        toast.classList.remove('error');
+        toastIcon.setAttribute('data-lucide', 'check-circle-2');
+        toastIcon.style.color = '#05f0a1';
+      }
+
+      lucide.createIcons();
+      toast.classList.add('show');
+
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3500);
+    }
+
+    // ==========================================
+    // 10. ROUTE HANDLERS & BINDINGS
+    // ==========================================
+
+    // Check URL hash and open corresponding member modal automatically
+    function handleHashRoute() {
+      const hash = window.location.hash.substring(1); // Remove the '#'
+      if (hash && hash !== '/admin') {
+        const member = membersData.find(m => m.id.toLowerCase() === hash.toLowerCase());
+        if (member) {
+          openModal(member);
+        }
+      }
+    }
+
+    // Run on load and on hash change
+    window.addEventListener('hashchange', checkRoute);
+
+    // Double-click logo secret shortcut to admin panel
+    document.getElementById('brandLogoContainer').addEventListener('dblclick', () => {
+      window.location.hash = '/admin';
+    });
+
+    // 11. Init Initialization
+    document.addEventListener('DOMContentLoaded', async () => {
+      await initDatabase();
+      checkRoute();
+
+      // Bind modal close button
+      if (modalCloseBtn) {
+        modalCloseBtn.addEventListener('click', closeModal);
+      }
+
+      // Close modal on overlay click
+      if (detailModal) {
+        detailModal.addEventListener('click', (e) => {
+          if (e.target === detailModal) closeModal();
+        });
+      }
+
+      // Bind public search input
+      if (searchInput) {
+        searchInput.addEventListener('input', renderDirectory);
+      }
+
+      // Bind public filter tabs
+      if (filterTabs) {
+        filterTabs.addEventListener('click', (e) => {
+          const tab = e.target.closest('.filter-tab');
+          if (!tab) return;
+
+          filterTabs.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+          renderDirectory();
+        });
+      }
+    });
+  </script>
+</body>
+
+</html>

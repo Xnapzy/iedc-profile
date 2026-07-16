@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redirecting to Admin Portal...</title>
+  <style>
+    body {
+      background-color: #030712;
+      color: #f8fafc;
+      font-family: 'Outfit', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .loader-container {
+      text-align: center;
+    }
+    .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      border-left: 4px solid #05f0a1;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1.5rem auto;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    a {
+      color: #05f0a1;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+  <script>
+    window.location.href = "../directory.html#/admin";
+  </script>
+</head>
+<body>
+  <div class="loader-container">
+    <div class="spinner"></div>
+    <p>Redirecting to Admin Portal...</p>
+    <p><a href="../directory.html#/admin">Click here if you are not automatically redirected.</a></p>
+  </div>
+</body>
+</html>
